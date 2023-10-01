@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
-using Unity.VisualScripting;
-using UnityEditor.Search;
 
 public class Client : MonoBehaviour
 {
     public static Client instance;
     public static int dataBufferSize = 4096;
-    public string ip = "127.0.0.1"; //Local Host
+    public string ip = "127.0.0.1"; //로컬 호스트
     public int port = 26950;
     public int myId = 0;
     public string userName;
@@ -21,9 +19,9 @@ public class Client : MonoBehaviour
     private static Dictionary<int, PacketHandler> packetHandlers;
     void Awake()
     {
-        if(instance == null)
+        if (instance == null)
             instance = this;
-        else if(instance != this)
+        else if (instance != this)
         {
             Debug.Log("Instanve already exists, destroying this obj");
             Destroy(this.gameObject);
@@ -53,12 +51,12 @@ public class Client : MonoBehaviour
         public void Connect(int _localPort)
         {
             socket = new UdpClient(_localPort);
-            
+
             socket.Connect(endPoint);
             socket.BeginReceive(ReceiveCallback, null);
 
             //서버 쪽에서 클라이언트의 endPoint를 저장해두기 위해서 그냥 빈 패킷 한번 보내기.
-            using(Packet _packet = new Packet())
+            using (Packet _packet = new Packet())
             {
                 SendData(_packet);
             }
@@ -70,12 +68,12 @@ public class Client : MonoBehaviour
             {
                 //서버에서 누가 보냈는지 알게 하려고 아이디를 맨 앞에 추가
                 _packet.InsertInt(instance.myId);
-                if(socket != null)
+                if (socket != null)
                 {
                     socket.BeginSend(_packet.ToArray(), _packet.Length(), null, null);
                 }
             }
-            catch(Exception _ex)
+            catch (Exception _ex)
             {
                 Debug.Log($"Error sending data to server via UDP : {_ex}");
             }
@@ -88,29 +86,29 @@ public class Client : MonoBehaviour
                 byte[] _data = socket.EndReceive(_result, ref endPoint);
                 socket.BeginReceive(ReceiveCallback, null);
 
-                if(_data.Length < 4)
+                if (_data.Length < 4)
                 {
                     //TODO : 연결끊기
                     return;
                 }
                 HandleData(_data);
             }
-            catch(Exception _ex)
+            catch (Exception _ex)
             {
                 //TODO : 연결끊기
             }
-            
+
         }
         private void HandleData(byte[] _data)
         {
-            using(Packet _packet = new Packet(_data))
+            using (Packet _packet = new Packet(_data))
             {
                 int _packetLength = _packet.ReadInt();
                 _data = _packet.ReadBytes(_packetLength);
 
                 ThreadManager.ExecuteOnMainThread(() =>
                 {
-                    using(Packet _packet = new Packet(_data))
+                    using (Packet _packet = new Packet(_data))
                     {
                         int _packetId = _packet.ReadInt();
                         packetHandlers[_packetId](_packet);
@@ -140,7 +138,8 @@ public class Client : MonoBehaviour
         private void ConnectCallback(IAsyncResult _result)
         {
             socket.EndConnect(_result);
-            if(!socket.Connected) {
+            if (!socket.Connected)
+            {
                 Debug.Log("Failed to Connect");
                 return;
             }
@@ -170,7 +169,7 @@ public class Client : MonoBehaviour
             try
             {
                 int _byteLength = stream.EndRead(_result);
-                if(_byteLength <= 0)
+                if (_byteLength <= 0)
                 {
                     //TODO : 연결끊기
                     return;
@@ -182,7 +181,7 @@ public class Client : MonoBehaviour
                 //TODO: _data 처리
                 stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
             }
-            catch(Exception _ex)
+            catch (Exception _ex)
             {
                 Debug.Log($"Error receiveing TCP data : {_ex} ");
                 //TODO : 연결끊기
@@ -193,15 +192,15 @@ public class Client : MonoBehaviour
             int _packetLength = 0;
             receivedData.SetBytes(_data);
 
-            if(receivedData.UnreadLength() >= 4)
+            if (receivedData.UnreadLength() >= 4)
             {
                 _packetLength = receivedData.ReadInt();
-                if(_packetLength <= 0)
+                if (_packetLength <= 0)
                 {
                     return true;
                 }
             }
-            while(_packetLength > 0 && _packetLength <= receivedData.UnreadLength())
+            while (_packetLength > 0 && _packetLength <= receivedData.UnreadLength())
             {
 
                 byte[] _packetBytes = receivedData.ReadBytes(_packetLength);
@@ -214,21 +213,21 @@ public class Client : MonoBehaviour
                     }
                 });
                 _packetLength = 0;
-                if(receivedData.UnreadLength() >= 4)
+                if (receivedData.UnreadLength() >= 4)
                 {
                     _packetLength = receivedData.ReadInt();
-                    if(_packetLength <=0)
+                    if (_packetLength <= 0)
                     {
                         return true;
                     }
                 }
             }
 
-            if(_packetLength <= 1)
+            if (_packetLength <= 1)
             {
                 return true;
             }
-            return false;   
+            return false;
 
         }
     }
@@ -239,7 +238,10 @@ public class Client : MonoBehaviour
         packetHandlers = new Dictionary<int, PacketHandler>()
         {
             { (int)ServerPackets.Welcome, ClientHandle.Welcome},
-            { (int)ServerPackets.UDPTest, ClientHandle.UDPTest}
+            { (int)ServerPackets.SpawnPlayer, ClientHandle.SpawnPlayer},
+            { (int)ServerPackets.PlayerPosition, ClientHandle.PlayerPosition},
+            { (int)ServerPackets.PlayerRotation, ClientHandle.PlayerRotation},
+            //{ (int)ServerPackets.UDPTest, ClientHandle.UDPTest}
         };
         Debug.Log("Initialize packets");
     }
