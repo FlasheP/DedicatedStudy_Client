@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
-using Unity.VisualScripting;
-using UnityEditor.Search;
 
 public class Client : MonoBehaviour
 {
@@ -240,7 +238,10 @@ public class Client : MonoBehaviour
         packetHandlers = new Dictionary<int, PacketHandler>()
         {
             { (int)ServerPackets.Welcome, ClientHandle.Welcome},
-            { (int)ServerPackets.UDPTest, ClientHandle.UDPTest}
+            { (int)ServerPackets.SpawnPlayer, ClientHandle.SpawnPlayer},
+            { (int)ServerPackets.PlayerPosition, ClientHandle.PlayerPosition},
+            { (int)ServerPackets.PlayerRotation, ClientHandle.PlayerRotation},
+            //{ (int)ServerPackets.UDPTest, ClientHandle.UDPTest}
         };
         Debug.Log("Initialize packets");
     }
