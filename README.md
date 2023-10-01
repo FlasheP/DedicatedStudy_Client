@@ -1,1 +1,1 @@
-# DedicatedServer_Study
+# DedicatedStudy_Client
