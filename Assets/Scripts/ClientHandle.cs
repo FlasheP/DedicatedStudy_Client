@@ -27,6 +27,12 @@ public static class ClientHandle
 
         GameManager.instance.SpawnPlayer(_id, _userName, _position, _rotation);
     }
+    public static void DisconncetPlayer(Packet _packet)
+    {
+        int _id = _packet.ReadInt();
+
+        GameManager.instance.DisconnectPlayer(_id);
+    }
     public static void PlayerPosition(Packet _packet)
     {
         int _id = _packet.ReadInt();
