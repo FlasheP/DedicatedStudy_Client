@@ -10,7 +10,8 @@ public enum ServerPackets
     SpawnPlayer = 2,
     PlayerPosition = 3,
     PlayerRotation = 4,
-    UDPTest = 5
+    DisconncetPlayer = 5,
+    UDPTest = 6
 }
 
 /// <summary>클라이언트에서 서버로 보낸 패킷 종류</summary>

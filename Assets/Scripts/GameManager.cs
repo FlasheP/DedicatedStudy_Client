@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,5 +31,12 @@ public class GameManager : MonoBehaviour
         _player.id = _id;
         _player.username = _userName;
         playersDic.Add(_id, _player);
+    }
+
+    public void DisconnectPlayer(int _id)
+    {
+        PlayerManager player = playersDic[_id];
+        Destroy(player.gameObject);
+        playersDic.Remove(_id);
     }
 }
